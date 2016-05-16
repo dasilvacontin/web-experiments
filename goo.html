@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<head></head>
+<body>
+  <div class="blobs">
+    <div class="blob"></div><div class="blob"></div><div class="blob"></div>
+  </div>
+
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <defs>
+      <filter id="goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+        <!--
+          about color matrix:
+          https://css-tricks.com/gooey-effect/#article-header-id-2
+        -->
+        <feColorMatrix in="blur" mode="matrix" values="
+          1 0 0  0  0
+          0 1 0  0  0
+          0 0 1  0  0
+          0 0 0 30 -16"
+          result="goo" />
+      </filter>
+    </defs>
+  </svg>
+
+  <style>
+    body, html {
+      background: #2FC7FF;
+      padding: 0;
+      margin: 0;
+    }
+
+    .blobs {
+      -webkit-filter: url('#goo');
+      filter: url('#goo');
+      padding: 100px;
+    }
+
+    .blob {
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 100%;
+      margin-right: 25px;
+      animation: traveller-blob cubic-bezier(0.1, 0.35, 0.2, 0.95) 2s infinite;
+      transform-origin: center center;
+    }
+    .blob:nth-child(1) {
+      animation-name: left-blob;
+    }
+    .blob:nth-child(3) {
+      animation-name: right-blob;
+      animation-timing-function: linear;
+      background: blue;
+    }
+
+    @keyframes left-blob {
+      0%   { transform: scale(  1); }
+      10%  { transform: scale(.75); }
+      85%  { transform: scale(.75); }
+      0%   { transform: scale(  1); }
+    }
+
+    @keyframes traveller-blob {
+      0%   { transform: translate(-125px, 0) scale(0.75); }
+      100% { transform: translate( 125px, 0) scale(0.75); }
+    }
+
+    @keyframes right-blob {
+      0%   { transform: scale(1   ); }
+      30%  { transform: scale( .95); }
+      70%  { transform: scale(1.05); }
+      100% { transform: scale(1   ); }
+    }
+  </style>
+</body>
+</html>
