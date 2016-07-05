@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<head>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #editor {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 630px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="myCanvas"></canvas>
+
+  <div id="editor">const canvas = myCanvas
+const ctx = canvas.getContext('2d')
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+
+const EMPTY = -1
+const OBSTACLE = -2
+const MATRIX_EDGE = 20
+const CELL_EDGE = 30
+
+const matrix = new Array(MATRIX_EDGE).fill().map((_, i) => {
+  return new Array(MATRIX_EDGE).fill().map((_, j) => {
+    const cell = Math.random() > 0.3 ? EMPTY : OBSTACLE
+    ctx.fillStyle = cell === OBSTACLE ? '#ff0000' : '#eaeaea'
+    ctx.fillRect(j * CELL_EDGE, i * CELL_EDGE, CELL_EDGE, CELL_EDGE)
+    return cell
+  }) 
+})
+
+let k = 0
+function dfs (i, j) {
+  // out of bounds
+  if (i < 0 || j < 0 || i >= MATRIX_EDGE || j >= MATRIX_EDGE) return
+
+  // non-empty cell
+  if (matrix[i][j] !== EMPTY) return
+
+  // fill position
+  ctx.fillStyle = '#0000ff'
+  ctx.fillRect(j * CELL_EDGE, i * CELL_EDGE, CELL_EDGE, CELL_EDGE)
+  matrix[i][j] = k
+
+  // render order of visit
+  ctx.fillStyle = 'white'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.font = 'sans-serif 10px'
+  ctx.fillText(k,  j * CELL_EDGE + CELL_EDGE / 2, i * CELL_EDGE + CELL_EDGE / 2)
+
+  // recursive search - change order of calls and see the effects
+  k++
+  dfs(i - 1, j)
+  dfs(i + 1, j)
+  dfs(i, j - 1)
+  dfs(i, j + 1)
+}
+const mid = Math.floor(MATRIX_EDGE / 2)
+dfs(mid, mid)
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script>
+    const editor = ace.edit('editor')
+    editor.setTheme('ace/theme/monokai')
+
+    function execCode () {
+      const script = document.createElement('script')
+      const code = editor.getValue()
+      script.innerHTML = '{' + code + '}'
+      document.body.appendChild(script)
+    }
+    editor.on('input', execCode)
+    execCode()
+   
+    const session = editor.getSession()
+    session.setMode('ace/mode/javascript')
+    session.on('changeMode', function () {
+      session.$worker.send('changeOptions',[{asi: true}])
+    })
+
+  </script>
+</body>
+</html>

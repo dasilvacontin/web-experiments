@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<head>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #editor {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 630px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="myCanvas"></canvas>
+
+  <div id="editor">const canvas = myCanvas
+const ctx = canvas.getContext('2d')
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+
+const EMPTY = -1
+const OBSTACLE = -2
+const MATRIX_EDGE = 20
+const CELL_EDGE = 30
+
+const COLORS = {
+  [EMPTY]: 'white',
+  [OBSTACLE]: 'red'
+}
+
+const matrix = new Array(MATRIX_EDGE).fill().map((_, i) => {
+  return new Array(MATRIX_EDGE).fill().map((_, j) => {
+    return Math.random() > 0.3 ? EMPTY : OBSTACLE
+  }) 
+})
+let debugCell
+
+function renderMap () {
+  requestAnimationFrame(renderMap)
+  matrix.forEach((row, i) => {
+    row.forEach((cell, j) => {
+      ctx.fillStyle = COLORS[cell] || 'blue'
+      ctx.fillRect(j * CELL_EDGE, i * CELL_EDGE, CELL_EDGE, CELL_EDGE)
+
+      if (cell >= 0) {
+        let dist = cell
+        ctx.fillStyle = 'white'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.font = 'sans-serif 10px'
+        ctx.fillText(dist,
+          j * CELL_EDGE + CELL_EDGE / 2,
+          i * CELL_EDGE + CELL_EDGE / 2)
+      }
+
+      if (debugCell && debugCell.i === i && debugCell.j === j) {
+        ctx.globalAlpha = 0.5
+        ctx.fillStyle = 'yellow'
+        ctx.fillRect(j * CELL_EDGE, i * CELL_EDGE, CELL_EDGE, CELL_EDGE)
+        ctx.globalAlpha = 1
+      }
+    })
+  })
+}
+renderMap()
+
+function bfs (queue = []) {
+  // get first element in queue
+  const head = queue.shift()
+  if (!head) return
+
+  // schedule next call
+  window.bfsTimeout = setTimeout(() => bfs(queue), 500)
+
+  const [i, j, dist] = head
+  debugCell = {i, j}
+
+  // out of bounds
+  if (i < 0 || j < 0 || i >= MATRIX_EDGE || j >= MATRIX_EDGE) return
+
+  // non-empty cell
+  if (matrix[i][j] !== EMPTY) return
+
+  // valid move - store distance from origin in matrix
+  matrix[i][j] = dist
+
+  // recursive search - change order of calls and see the effects
+  queue.push([i - 1, j, dist + 1])
+  queue.push([i + 1, j, dist + 1])
+  queue.push([i, j - 1, dist + 1])
+  queue.push([i, j + 1, dist + 1])
+}
+const mid = Math.floor(MATRIX_EDGE / 2)
+bfs([[mid, mid, 0]])
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script>
+    const editor = ace.edit('editor')
+    editor.setTheme('ace/theme/monokai')
+
+    function execCode () {
+      const script = document.createElement('script')
+      const code = editor.getValue()
+      script.innerHTML = '{' + code + '}'
+      document.body.appendChild(script)
+    }
+    editor.on('input', execCode)
+    execCode()
+   
+    const session = editor.getSession()
+    session.setMode('ace/mode/javascript')
+    session.on('changeMode', function () {
+      session.$worker.send('changeOptions',[{asi: true}])
+    })
+
+  </script>
+</body>
+</html>
