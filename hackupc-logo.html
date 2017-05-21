@@ -1,0 +1,54 @@
+<!DOCTYPE html5>
+<html>
+<head>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #eaeaea;
+        }
+
+        img {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 620px;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+    <img id="back" src="hackupc-header-cyan.png">
+    <img src="hackupc-header-cyan.png">
+    <img id="front" src="hackupc-header.png">
+    
+    <audio style="display: none"  src="https://files.freemusicarchive.org/music%2FWFMU%2FSun_Araw%2FBeach_Head%2FSun_Araw_-_02_-_Horse_Steppin.mp3" preload autoplay>
+    <script>
+        const MAX_OFFSET = 5
+
+        const front = document.getElementById('front')
+        const back = document.getElementById('back')
+
+        const titleWidth = 620
+        const titleHeight = 280
+
+        document.addEventListener('mousemove', mouseEvent => {
+            const { pageX, pageY } = mouseEvent
+            const { innerWidth, innerHeight } = window
+            const halfWidth = innerWidth / 2
+            const halfHeight = innerHeight / 2
+            
+            const offset = {
+                x: MAX_OFFSET * (pageX - halfWidth) / halfWidth,
+                y: MAX_OFFSET * (pageY - halfHeight) / halfHeight
+            }
+
+            back.style.transform = `translate(${-titleWidth / 2 - offset.x}px, ${-titleHeight / 2 - offset.y}px)`
+            front.style.transform = `translate(${-titleWidth / 2 + offset.x}px, ${-titleHeight / 2 + offset.y}px)`
+        })
+    </script>
+</body>
+</html>
