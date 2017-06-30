@@ -21,19 +21,30 @@
     </style>
 </head>
 <body>
-    <img id="back" src="hackupc-header-cyan.png">
-    <img src="hackupc-header-cyan.png">
-    <img id="front" src="hackupc-header.png">
-    
     <audio style="display: none"  src="https://files.freemusicarchive.org/music%2FWFMU%2FSun_Araw%2FBeach_Head%2FSun_Araw_-_02_-_Horse_Steppin.mp3" preload autoplay>
+
     <script>
-        const MAX_OFFSET = 5
+        const MAX_OFFSET = 8
 
         const front = document.getElementById('front')
         const back = document.getElementById('back')
 
         const titleWidth = 620
         const titleHeight = 280
+
+        const imgs = []
+        const LAYER_COUNT = 20
+        const STEP = 2 / (LAYER_COUNT - 1)
+
+        for (let i = 0; i < LAYER_COUNT; ++i) {
+            const img = document.createElement('img')
+            const isLast = i + 1 === LAYER_COUNT 
+            img.src = (isLast
+                ? 'hackupc-header.png'
+                : 'hackupc-header-cyan.png')
+            document.body.appendChild(img)
+            imgs.push(img)
+        }
 
         document.addEventListener('mousemove', mouseEvent => {
             const { pageX, pageY } = mouseEvent
@@ -46,8 +57,13 @@
                 y: MAX_OFFSET * (pageY - halfHeight) / halfHeight
             }
 
-            back.style.transform = `translate(${-titleWidth / 2 - offset.x}px, ${-titleHeight / 2 - offset.y}px)`
-            front.style.transform = `translate(${-titleWidth / 2 + offset.x}px, ${-titleHeight / 2 + offset.y}px)`
+            imgs.forEach((img, i) => {
+                const mult = -1 + STEP * i
+                img.style.transform = `translate(
+                    ${ -titleWidth / 2  + mult *  offset.x }px,
+                    ${ -titleHeight / 2 + mult * offset.y }px
+                )`
+            })
         })
     </script>
 </body>
