@@ -1,0 +1,67 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, user-scalable=0, initial-scale=1">
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      background: black;
+    }
+  </style>
+</head>
+<body>
+<script>
+document.body.style.zoom = 1
+const canvas = document.createElement('canvas')
+document.body.appendChild(canvas)
+const ctx = canvas.getContext('2d')
+window.onresize = () => {
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+  ctx.fillStyle = 'blue'
+  ctx.strokeStyle = 'white'
+  ctx.textAlign = 'center'
+  ctx.font = "30px Helvetica"
+}
+window.onresize()
+
+let lastTouchEvent
+function saveTouches (e) {
+  lastTouchEvent = e
+  e.preventDefault()
+}
+
+function renderTouches () {
+  requestAnimationFrame(renderTouches)
+  if (!lastTouchEvent) return
+  touches = Array.prototype.slice.call(lastTouchEvent.touches)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  touches.forEach(touch => {
+    const { pageX, pageY } = touch
+    const radius = Math.max(touch.radiusX, touch.radiusY)
+    const drawnRadius = 2*radius
+    const force = touch.force || 0
+
+    ctx.beginPath()
+    ctx.arc(pageX, pageY, force * drawnRadius, 0, 2*Math.PI)
+    ctx.fill()
+
+    ctx.beginPath()
+    ctx.arc(pageX, pageY, drawnRadius, 0, 2*Math.PI)
+    ctx.stroke()
+
+    const debugText = `r:${Math.round(radius)}, f:${Math.round(force*100)/100}`
+    ctx.strokeText(debugText, touch.pageX, touch.pageY - drawnRadius - 20)
+  })
+}
+
+document.addEventListener('touchstart', saveTouches)
+document.addEventListener('touchmove', saveTouches)
+document.addEventListener('touchend', saveTouches)
+document.addEventListener('touchforcechange', saveTouches)
+renderTouches()
+</script>
+</body>
